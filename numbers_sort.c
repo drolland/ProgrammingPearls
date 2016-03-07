@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <glib.h>
 
 typedef struct s_file_chunk{
     int size;
@@ -68,12 +69,18 @@ void chunk_qsort(Chunk* ch){
 
 void disk_merge_sort(){
     
-    Chunk* ch = chunk_new(10);
+    int start = g_get_monotonic_time();
+    
+    Chunk* ch = chunk_new(7000000);
     FILE* f = fopen("list.txt","r");
     load_chunk(ch,f);
     chunk_qsort(ch);
-    print_chunk(ch);
+    //print_chunk(ch);
     fclose(f);
     printf("%d\n",chunk_pop(ch));
     printf("%d\n",chunk_pop(ch));
+    
+    int stop = g_get_monotonic_time();
+    
+    printf("Numbers sorted in %.0f ms",(stop-start) / 1000.0f);
 }
