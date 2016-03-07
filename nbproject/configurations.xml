@@ -18,6 +18,7 @@
       <itemPath>generate.h</itemPath>
       <itemPath>main.c</itemPath>
       <itemPath>numbers_sort.c</itemPath>
+      <itemPath>numbers_sort.h</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
                    displayName="Test Files"
@@ -70,6 +71,8 @@
       </item>
       <item path="numbers_sort.c" ex="false" tool="0" flavor2="0">
       </item>
+      <item path="numbers_sort.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="tests/generate_list.c" ex="false" tool="0" flavor2="0">
       </item>
     </conf>
@@ -121,6 +124,8 @@
       <item path="main.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="numbers_sort.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="numbers_sort.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="tests/generate_list.c" ex="false" tool="0" flavor2="0">
       </item>

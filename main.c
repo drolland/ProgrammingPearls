@@ -9,13 +9,13 @@
 #include <time.h> 
 #include "bit_vector.h"
 #include "generate.h"
-
+#include "numbers_sort.h"
 
 
 
 int main(int argc, char** argv) {
 
-    generate_list();
+    disk_merge_sort();
     
     return (EXIT_SUCCESS);
 }
