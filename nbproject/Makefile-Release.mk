@@ -37,6 +37,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 OBJECTFILES= \
 	${OBJECTDIR}/bit_vector.o \
 	${OBJECTDIR}/generate.o \
+	${OBJECTDIR}/heap.o \
 	${OBJECTDIR}/main.o \
 	${OBJECTDIR}/numbers_sort.o
 
@@ -84,6 +85,11 @@ ${OBJECTDIR}/generate.o: generate.c
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.c) -O3 -std=c11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/generate.o generate.c
+
+${OBJECTDIR}/heap.o: heap.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.c) -O3 -std=c11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/heap.o heap.c
 
 ${OBJECTDIR}/main.o: main.c 
 	${MKDIR} -p ${OBJECTDIR}
@@ -137,6 +143,19 @@ ${OBJECTDIR}/generate_nomain.o: ${OBJECTDIR}/generate.o generate.c
 	    $(COMPILE.c) -O3 -std=c11 -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/generate_nomain.o generate.c;\
 	else  \
 	    ${CP} ${OBJECTDIR}/generate.o ${OBJECTDIR}/generate_nomain.o;\
+	fi
+
+${OBJECTDIR}/heap_nomain.o: ${OBJECTDIR}/heap.o heap.c 
+	${MKDIR} -p ${OBJECTDIR}
+	@NMOUTPUT=`${NM} ${OBJECTDIR}/heap.o`; \
+	if (echo "$$NMOUTPUT" | ${GREP} '|main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
+	then  \
+	    ${RM} "$@.d";\
+	    $(COMPILE.c) -O3 -std=c11 -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/heap_nomain.o heap.c;\
+	else  \
+	    ${CP} ${OBJECTDIR}/heap.o ${OBJECTDIR}/heap_nomain.o;\
 	fi
 
 ${OBJECTDIR}/main_nomain.o: ${OBJECTDIR}/main.o main.c 
