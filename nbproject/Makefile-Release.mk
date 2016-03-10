@@ -54,7 +54,7 @@ TESTOBJECTFILES= \
 	${TESTDIR}/tests/generate_list.o
 
 # C Compiler Flags
-CFLAGS=`pkg-config --libs --cflags glib-2.0` 
+CFLAGS=`pkg-config --libs --cflags glib-2.0 cairo` 
 
 # CC Compiler Flags
 CCFLAGS=

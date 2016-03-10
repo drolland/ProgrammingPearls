@@ -30,5 +30,5 @@ void tools_warmup(){
 
 void tools_print_memusage(){
     struct mallinfo info =  mallinfo();
-    printf("user memory %.2f Mo, %.2f Mo with mmap\n",info.arena / 1000000.0f,info.hblkhd / 1000000.0f);
+    printf("used memory %.2f Mo, %.2f Mo with mmap\n",info.arena / 1000000.0f,info.hblkhd / 1000000.0f);
 }

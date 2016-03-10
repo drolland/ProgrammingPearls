@@ -102,7 +102,7 @@
         <cTool>
           <developmentMode>6</developmentMode>
           <standard>10</standard>
-          <commandLine>`pkg-config --libs --cflags glib-2.0`</commandLine>
+          <commandLine>`pkg-config --libs --cflags glib-2.0 cairo`</commandLine>
         </cTool>
         <ccTool>
           <developmentMode>5</developmentMode>
