@@ -39,7 +39,8 @@ OBJECTFILES= \
 	${OBJECTDIR}/generate.o \
 	${OBJECTDIR}/heap.o \
 	${OBJECTDIR}/main.o \
-	${OBJECTDIR}/numbers_sort.o
+	${OBJECTDIR}/numbers_sort.o \
+	${OBJECTDIR}/tools.o
 
 # Test Directory
 TESTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}/tests
@@ -100,6 +101,11 @@ ${OBJECTDIR}/numbers_sort.o: numbers_sort.c
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.c) -O3 -std=c11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/numbers_sort.o numbers_sort.c
+
+${OBJECTDIR}/tools.o: tools.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.c) -O3 -std=c11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/tools.o tools.c
 
 # Subprojects
 .build-subprojects:
@@ -182,6 +188,19 @@ ${OBJECTDIR}/numbers_sort_nomain.o: ${OBJECTDIR}/numbers_sort.o numbers_sort.c
 	    $(COMPILE.c) -O3 -std=c11 -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/numbers_sort_nomain.o numbers_sort.c;\
 	else  \
 	    ${CP} ${OBJECTDIR}/numbers_sort.o ${OBJECTDIR}/numbers_sort_nomain.o;\
+	fi
+
+${OBJECTDIR}/tools_nomain.o: ${OBJECTDIR}/tools.o tools.c 
+	${MKDIR} -p ${OBJECTDIR}
+	@NMOUTPUT=`${NM} ${OBJECTDIR}/tools.o`; \
+	if (echo "$$NMOUTPUT" | ${GREP} '|main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
+	then  \
+	    ${RM} "$@.d";\
+	    $(COMPILE.c) -O3 -std=c11 -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/tools_nomain.o tools.c;\
+	else  \
+	    ${CP} ${OBJECTDIR}/tools.o ${OBJECTDIR}/tools_nomain.o;\
 	fi
 
 # Run Test Targets

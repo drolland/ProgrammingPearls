@@ -4,6 +4,11 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <glib.h>
+#include <malloc.h>
+#include <cairo.h>
+#include <math.h>
+
+#include "tools.h"
 
 /* ------------- CHUNK OF DATA ---------------
  */
@@ -23,7 +28,12 @@ Chunk* chunk_new(int size) {
     return new;
 }
 
-int load_chunk(Chunk* chunk, FILE* file) {
+void chunk_free(Chunk* ch) {
+    free(ch->array);
+    free(ch);
+}
+
+int chunk_load(Chunk* chunk, FILE* file) {
     assert(chunk != NULL);
     int i = 0;
     for (i = 0; i < chunk->size; i++) {
@@ -31,10 +41,13 @@ int load_chunk(Chunk* chunk, FILE* file) {
         if (code != 1) {
             if (code != EOF)
                 printf("An error occured parsing the file\n");
-            return i;
+            chunk->size = i;
+            break;
         }
+
     }
-    return i;
+    chunk->current = chunk->array;
+    return chunk->size;
 }
 
 void chunk_print(Chunk* chunk) {
@@ -46,12 +59,15 @@ void chunk_print(Chunk* chunk) {
     }
 }
 
-int32_t chunk_pop(Chunk* ch) {
-    if (ch->current - ch->array > (ch->size - 1) * sizeof (int32_t))
+static inline int32_t chunk_value(Chunk* ch){
+    return *(ch->current);
+}
+
+static inline int32_t chunk_inc(Chunk* ch) {
+    if (ch->current - ch->array >= ( ch->size -1 ) )
         return -1;
-    int32_t val = *(ch->current);
     ch->current++;
-    return val;
+    return 1;
 }
 
 static int compare_int32(void const *a, void const *b) {
@@ -65,102 +81,97 @@ void chunk_qsort(Chunk* ch) {
     qsort(ch->array, ch->size, sizeof (int32_t), compare_int32);
 }
 
-/* ------------- HEAP BINARY TREE ---------------
- */
+#define CHUNK_SIZE 25000
 
-typedef struct s_heap {
-    Chunk* chunk;
-    struct s_heap* left;
-    struct s_heap* rigth;
-} Heap;
-
-/* TODO : Tail recursion */
-static inline void heap_cascade(Heap* node){
-    if ( node->left == NULL ){
-        if ( node->rigth != NULL){
-            node->left = node->rigth;
-            node->rigth = NULL;
-        }
-        else
-            return;
+void chunk_test(){
+    
+    FILE* f = fopen("list.txt", "r");
+    
+    Chunk* chunk = chunk_new(CHUNK_SIZE);
+    
+    chunk_load(chunk,f);
+    
+    for(int i = 0; i < CHUNK_SIZE + 50; i++){
+        printf("%d\n",chunk_value(chunk));
+        if ( chunk_inc(chunk) < 0 ) break;
     }
     
-    if ( node->rigth == NULL){
-        if ( node->left->left != NULL){
-            node->rigth = node->left->left;
-            node->left->left = NULL;
-            heap_cascade(node->left);
-        }
-    }
+    fclose(f);
 }
 
-Heap* heap_insert(Heap* heap, Heap* to_insert) {
-    if (heap == NULL)
-        return heap;
 
-    if (heap->left == NULL) {
-
-        if (*(heap->chunk->current) <= *(to_insert->chunk->current)) {
-            heap->left = to_insert;
-            return heap;
-        } else {
-            to_insert->left = heap;
-            return to_insert;
-        }
-    } else if (heap->rigth == NULL) {
-
-        if (*(heap->chunk->current) <= *(to_insert->chunk->current)) {
-            heap->rigth = to_insert;
-            return heap;
-        } else {
-            to_insert->left = heap->left;
-            heap->left = NULL;
-            to_insert->rigth = heap;
-            return to_insert;
-        }
-    } else {
-
-        if (*(heap->chunk->current) > *(to_insert->chunk->current)) {
-            to_insert->left = heap;
-            to_insert->rigth = heap->left;
-            heap->left = heap->rigth;
-            heap->rigth = NULL;
-            heap_cascade(heap);
-            return to_insert;
-
-        } else {
-            if (*(heap->left->chunk->current) <= *(heap->rigth->chunk->current)) {
-                if (*(to_insert->chunk->current) < *(heap->left->chunk->current)) {
-
-                }
-
-            } else {
-                to_insert->left = heap->left;
-                heap->left = NULL;
-                to_insert->rigth = heap;
-                return to_insert;
-            }
-
-        }
-
-
-    }
-}
+#define NB_CHUNK 9
+#define CHUNK_SIZE 25000
 
 void disk_merge_sort() {
 
     int start = g_get_monotonic_time();
 
-    Chunk* ch = chunk_new(7000000);
+    Chunk * ch[NB_CHUNK];
+
     FILE* f = fopen("list.txt", "r");
-    load_chunk(ch, f);
-    chunk_qsort(ch);
-    //print_chunk(ch);
+    FILE* f_out = fopen("out_list.txt", "w");
+
+    int data_remaining = 1;
+
+    for (int i = 0; i < NB_CHUNK; i++)
+        ch[i] = NULL;
+
+    int valid_chunks = 0;
+
+    for (int i = 0; i < NB_CHUNK && data_remaining == 1; i++) {
+        ch[i] = chunk_new(CHUNK_SIZE);
+        if (chunk_load(ch[i], f) != CHUNK_SIZE)
+            data_remaining = 0;
+        chunk_qsort(ch[i]);
+        valid_chunks++;
+    }
+
+
+    int count = 0;
+    
+    while (valid_chunks > 0) {
+        
+        for (int i = 0; i < NB_CHUNK; i++) {
+            
+            
+            
+            int min = INT32_MAX;
+            int index = -1;
+            
+            for (int j = 0; j < NB_CHUNK; j++)
+                if (ch[j] != NULL) {
+                    if (chunk_value(ch[j]) < min) {
+                        min = chunk_value(ch[j]);
+                        index = j;
+                    }
+                }
+            
+            fprintf(f_out, "%d\n", chunk_value(ch[index]));
+            
+            if (chunk_inc(ch[index]) < 0) {
+                if (data_remaining) {
+                    if (chunk_load(ch[index], f) != CHUNK_SIZE)
+                        data_remaining = 0;
+                    chunk_qsort(ch[index]);
+                } else {
+                    chunk_free(ch[index]);
+                    ch[index] = NULL;
+                    valid_chunks--;
+                }
+            }
+        }
+        
+        
+    }
+
+
     fclose(f);
-    printf("%d\n", chunk_pop(ch));
-    printf("%d\n", chunk_pop(ch));
+    fclose(f_out);
+
 
     int stop = g_get_monotonic_time();
 
     printf("Numbers sorted in %.0f ms", (stop - start) / 1000.0f);
 }
+

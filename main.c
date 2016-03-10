@@ -10,13 +10,18 @@
 #include "bit_vector.h"
 #include "generate.h"
 #include "numbers_sort.h"
-#include "heap.h"
+#include "tools.h"
+
 
 
 int main(int argc, char** argv) {
 
-    // disk_merge_sort();
-    test_heap();
+    tools_warmup();
+    
+    //chunk_test();
+    
+    disk_merge_sort();
+    //heap2_test();
     return (EXIT_SUCCESS);
 }
 

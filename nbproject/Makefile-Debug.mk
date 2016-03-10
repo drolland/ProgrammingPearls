@@ -39,7 +39,8 @@ OBJECTFILES= \
 	${OBJECTDIR}/generate.o \
 	${OBJECTDIR}/heap.o \
 	${OBJECTDIR}/main.o \
-	${OBJECTDIR}/numbers_sort.o
+	${OBJECTDIR}/numbers_sort.o \
+	${OBJECTDIR}/tools.o
 
 # Test Directory
 TESTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}/tests
@@ -53,7 +54,7 @@ TESTOBJECTFILES= \
 	${TESTDIR}/tests/generate_list.o
 
 # C Compiler Flags
-CFLAGS=
+CFLAGS=`pkg-config --libs --cflags glib-2.0 cairo` 
 
 # CC Compiler Flags
 CCFLAGS=
@@ -74,7 +75,7 @@ LDLIBSOPTIONS=
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/programmingpearls: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
-	${LINK.c} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/programmingpearls ${OBJECTFILES} ${LDLIBSOPTIONS}
+	${LINK.c} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/programmingpearls ${OBJECTFILES} ${LDLIBSOPTIONS} `pkg-config --libs --cflags glib-2.0 cairo` -lm
 
 ${OBJECTDIR}/bit_vector.o: bit_vector.c 
 	${MKDIR} -p ${OBJECTDIR}
@@ -100,6 +101,11 @@ ${OBJECTDIR}/numbers_sort.o: numbers_sort.c
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.c) -g -std=c11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/numbers_sort.o numbers_sort.c
+
+${OBJECTDIR}/tools.o: tools.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.c) -g -std=c11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/tools.o tools.c
 
 # Subprojects
 .build-subprojects:
@@ -182,6 +188,19 @@ ${OBJECTDIR}/numbers_sort_nomain.o: ${OBJECTDIR}/numbers_sort.o numbers_sort.c
 	    $(COMPILE.c) -g -std=c11 -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/numbers_sort_nomain.o numbers_sort.c;\
 	else  \
 	    ${CP} ${OBJECTDIR}/numbers_sort.o ${OBJECTDIR}/numbers_sort_nomain.o;\
+	fi
+
+${OBJECTDIR}/tools_nomain.o: ${OBJECTDIR}/tools.o tools.c 
+	${MKDIR} -p ${OBJECTDIR}
+	@NMOUTPUT=`${NM} ${OBJECTDIR}/tools.o`; \
+	if (echo "$$NMOUTPUT" | ${GREP} '|main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
+	then  \
+	    ${RM} "$@.d";\
+	    $(COMPILE.c) -g -std=c11 -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/tools_nomain.o tools.c;\
+	else  \
+	    ${CP} ${OBJECTDIR}/tools.o ${OBJECTDIR}/tools_nomain.o;\
 	fi
 
 # Run Test Targets
